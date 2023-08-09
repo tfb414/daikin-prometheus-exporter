@@ -1,0 +1,12 @@
+services:
+  daikin-prometheus-exporter:
+    build: .
+    ports:
+      - "5555:5555"
+    environment:
+      X_API_KEY: ${X_API_KEY}
+      DAIKIN_CACHE_FOR: 240
+      INTEGRATOR_TOKEN: ${INTEGRATOR_TOKEN}
+      ACCOUNT_EMAIL: ${ACCOUNT_EMAIL}
+      DEVICE_ID: ${DEVICE_ID}
+      DAIKIN_EXPORTER_PORT: 5555
