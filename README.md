@@ -1,10 +1,3 @@
-# Speedtest Exporter
+# Daikin Thermostat Exporter
 
-Simple **Speedtest exporter** for **Prometheus** written in **Python** using the
-official CLI from **Ookla**
-
-You can get all the documentation [here](https://docs.miguelndecarvalho.pt/projects/speedtest-exporter/)
-
-## Thanks to
-
-- [Nils Müller](https://github.com/tyriis)
+Simple **exporter** for **Prometheus** written in **Python** to get information from you Daikin thermostat
