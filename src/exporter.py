@@ -26,13 +26,15 @@ outside_humidity = Gauge('ac_humidity_outside', "AC's humidity at the unit")
 fan = Gauge('ac_fan', "AC's fan setting 0: auto, 1: on")
 humIndoor = Gauge('ac_humIndoor', "AC's indoor humidity")
 modeLimit = Gauge('ac_modeLimit', "AC's mode; 0: none, 1: all, 2: heat only, 3: cool only")
-tempOutdoor = Gauge('ac_tempOutdoor', "AC's indoor temperature in celcius")
+tempOutdoor = Gauge('ac_tempOutdoor', "AC's indoor temperature in f")
 mode = Gauge('ac_mode', "AC's Thermostate mode; 0: off, 1: heat, 2: cool, 3: auto, 4: emergencyHeat")
 setpointMaximum = Gauge('ac_setpointMaximum', "AC's Maximum temperature threshold supported by the system in 0.1 degree Celsius increments")
 coolSetpoint = Gauge('ac_coolSetpoint', "AC's Cooling threshold for the 'Manual' operating mode")
 heatSetpoint = Gauge('ac_heatSetpoint', "AC's Heating threshold for the 'Manual' operating mode")
 fanCirculateSpeed = Gauge('ac_fanCirculateSpeed', "AC's Speed at which fan should run when circulating on a schedule; 0: low, 1: medium, 2: high")
 equipmentStatus = Gauge('ac_equipmentStatus', "AC's HVAC equipmentStatus; 1: cool, 2: overcool for dehum, 3: heat, 4: fan, 5: idle")
+coolingStatus = Gauge('ac_coolingStatus', "AC's HVAC cooling status; 1: cool, 0: notCooling")
+heatingStatus = Gauge('ac_heatingStatus', "AC's HVAC heating status; 1: heat, 0: notHeating")
 tempIndoor = Gauge('ac_tempIndoor', "AC's Current indoor temperature")
 setpointDelta = Gauge('ac_setpointDelta', "AC's minimum temperature delta in 0.5 celcius increments")
 equipmentCommunication = Gauge('ac_equipmentCommunication', "AC's equipment communication")
@@ -52,10 +54,6 @@ def convertFromFToC(celsius, digitsToRound):
     return round((1.8 * celsius), digitsToRound) + 32
 
 def getAccessToken():
-    print("HERE")
-    print(os.getenv('X_API_KEY'))
-
-
     url = 'https://integrator-api.daikinskyport.com/v1/token'
     headers = {
         'x-api-key': os.getenv('X_API_KEY'),
@@ -75,8 +73,6 @@ def getAccessToken():
         print("WARNING WILL ROBINSON")
 
     access_token = response.json()['accessToken']
-    print(access_token)
-
 
 #   DO SOME ERROR HANDLING HERE
     return access_token
@@ -104,7 +100,6 @@ def getMetrics(access_token):
             print(data['error'])
             return (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)  # Return all data as 0
 
-
         actual_fan = data['fan']
         actual_humIndoor = data['humIndoor']
         actual_modeLimit = data['modeLimit']
@@ -124,7 +119,8 @@ def getMetrics(access_token):
         actual_geofencingEnabled = data['geofencingEnabled']
         actual_scheduleEnabled = data['scheduleEnabled']
         actual_setpointMinimum = data['setpointMinimum']
-
+        actual_coolingStatus = 1 if data['equipmentStatus'] == 1 else 0
+        actual_heatingStatus = 1 if data['equipmentStatus'] == 3 else 0
 
         return (actual_humOutdoor,
                 actual_fan,
@@ -144,7 +140,10 @@ def getMetrics(access_token):
                 actual_modeEmHeatAvailable,
                 actual_geofencingEnabled,
                 actual_scheduleEnabled,
-                actual_setpointMinimum)
+                actual_setpointMinimum,
+                actual_coolingStatus,
+                actual_heatingStatus,
+                )
 
 @app.route("/metrics")
 def updateResults():
@@ -153,7 +152,7 @@ def updateResults():
     if datetime.datetime.now() > cache_until:
         access_token = getAccessToken()
 
-        r_outside_humidity, r_fan, r_humIndoor, r_modeLimit, r_tempOutdoor, r_mode, r_setpointMaximum, r_coolSetpoint, r_heatSetpoint, r_fanCirculateSpeed, r_equipmentStatus, r_tempIndoor, r_setpointDelta, r_equipmentCommunication, r_fanCirculate, r_modeEmHeatAvailable, r_geofencingEnabled, r_scheduleEnabled, r_setpointMinimum = getMetrics(access_token)
+        r_outside_humidity, r_fan, r_humIndoor, r_modeLimit, r_tempOutdoor, r_mode, r_setpointMaximum, r_coolSetpoint, r_heatSetpoint, r_fanCirculateSpeed, r_equipmentStatus, r_tempIndoor, r_setpointDelta, r_equipmentCommunication, r_fanCirculate, r_modeEmHeatAvailable, r_geofencingEnabled, r_scheduleEnabled, r_setpointMinimum, r_coolingStatus, r_heatingStatus = getMetrics(access_token)
         outside_humidity.set(r_outside_humidity)
         fan.set(r_fan)
         humIndoor.set(r_humIndoor)
@@ -173,7 +172,11 @@ def updateResults():
         geofencingEnabled.set(r_geofencingEnabled)
         scheduleEnabled.set(r_scheduleEnabled)
         setpointMinimum.set(r_setpointMinimum)
+        coolingStatus.set(r_coolingStatus)
+        heatingStatus.set(r_heatingStatus)
         up.set(1)
+
+
 
         cache_until = datetime.datetime.now() + datetime.timedelta(
             seconds=cache_seconds)
