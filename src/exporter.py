@@ -152,8 +152,7 @@ def updateResults():
     if datetime.datetime.now() > cache_until:
         access_token = getAccessToken()
 
-        r_outside_humidity, r_fan, r_humIndoor, r_modeLimit, r_tempOutdoor, r_mode, r_setpointMaximum, r_coolSetpoint, r_heatSetpoint, r_fanCirculateSpeed, r_equipmentStatus, r_tempIndoor, r_setpointDelta, r_equipmentCommunication, r_fanCirculate, r_modeEmHeatAvailable, r_geofencingEnabled, r_scheduleEnabled, r_setpointMinimum, r_coolingStatus, r_heatingStatus = getMetrics
-        (access_token)
+        r_outside_humidity, r_fan, r_humIndoor, r_modeLimit, r_tempOutdoor, r_mode, r_setpointMaximum, r_coolSetpoint, r_heatSetpoint, r_fanCirculateSpeed, r_equipmentStatus, r_tempIndoor, r_setpointDelta, r_equipmentCommunication, r_fanCirculate, r_modeEmHeatAvailable, r_geofencingEnabled, r_scheduleEnabled, r_setpointMinimum, r_coolingStatus, r_heatingStatus = getMetrics(access_token)
         outside_humidity.set(r_outside_humidity)
         fan.set(r_fan)
         humIndoor.set(r_humIndoor)
