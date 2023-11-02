@@ -90,7 +90,7 @@ def getMetrics(access_token):
     print(response.status_code)
     if (response.status_code != 200):
         print("WARNING WILL ROBINSON")
-        return (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        return (None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None)
 
     if (response.json()):
         data = response.json()
@@ -98,7 +98,7 @@ def getMetrics(access_token):
             # Socket error
             print('Something went wrong')
             print(data['error'])
-            return (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)  # Return all data as 0
+            return (None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None)  # Return all data as 0
 
         actual_fan = data['fan']
         actual_humIndoor = data['humIndoor']
@@ -175,8 +175,6 @@ def updateResults():
         coolingStatus.set(r_coolingStatus)
         heatingStatus.set(r_heatingStatus)
         up.set(1)
-
-
 
         cache_until = datetime.datetime.now() + datetime.timedelta(
             seconds=cache_seconds)
